@@ -351,3 +351,56 @@ state/power. Plan approved in `/root/.claude/plans/fastapi-cached-flame.md`.
 - [x] Verify end-to-end (health/list/state/on/off/toggle/energy via curl;
       plug1 ON->91.5 W, OFF->0.0 W)
 - [x] Open PR -> coport-uni/python-smart-plug @ master (#9)
+
+---
+
+## Write an ESP32-S3 integration guide for the plug-control API
+
+### Background
+User request (2026-06-18): produce a document, shareable with an ESP32-S3
+developer, that explains how to talk to the FastAPI plug-control server
+(port 17046) built above. This completes the ESP32 side of issue #6.
+
+### Decisions
+- Add `docs/esp32-integration.md`: a self-contained guide written in English
+  (per CLAUDE.md §2) so it can be handed to an external developer who never
+  sees the Python side.
+- Cover: overview + network setup, the full HTTP contract (every endpoint
+  with exact request/response JSON and status codes), timing caveats (per-
+  request device latency + the ~4-6 s P110M emeter settle), a curl quick
+  test, and complete client examples for both Arduino-ESP32 and ESP-IDF
+  (`esp_http_client`), plus troubleshooting.
+- Bundle into the existing branch `feature/fastapi-plug-server` / PR #9
+  rather than opening a separate issue/PR, since it documents that same
+  (still-unmerged) feature and is in scope for issue #6.
+
+### Work items
+- [x] Write `docs/esp32-integration.md` (contract + Arduino + ESP-IDF)
+- [x] Commit to `feature/fastapi-plug-server` and push (updates PR #9)
+
+---
+
+## Group main.py CLI logic into a SmartPlugCli class
+
+### Background
+User request (2026-06-18): after consolidating device logic into one
+`SmartPlugController`, the loose CLI functions in `main.py` (parser, format,
+run) should likewise be grouped into a class.
+
+### Decisions
+- Chosen option (via clarifying question): introduce a NEW `SmartPlugCli`
+  presentation class in `main.py` (not fold into `SmartPlugController`), to
+  keep device logic vs. CLI/output layers separated.
+- Move `format_measure`/`format_state` (staticmethods), `format_report`/
+  `format_switch` (classmethods), `build_parser` (staticmethod), and
+  `run_status`/`run_switch` (instance methods) into `SmartPlugCli`; replace
+  module-level `main()` with `SmartPlugCli().run()` at the entry point.
+- Pure refactor, no behavior change. Only `main.py` changes; nothing external
+  imports `main` (verified), so the controller/verify/server are untouched.
+- Plan: /root/.claude/plans/crispy-foraging-candle.md (approved).
+
+### Work items
+- [ ] Rewrite `main.py`: wrap parser/format/run into `SmartPlugCli`
+- [ ] Re-verify behavior unchanged: `status` + on/off + error path (restore)
+- [ ] Pass `ruff check` + `ruff format --check`
+- [ ] Create GitHub issue on coport-uni/python-smart-plug
