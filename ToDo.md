@@ -400,7 +400,100 @@ run) should likewise be grouped into a class.
 - Plan: /root/.claude/plans/crispy-foraging-candle.md (approved).
 
 ### Work items
-- [ ] Rewrite `main.py`: wrap parser/format/run into `SmartPlugCli`
-- [ ] Re-verify behavior unchanged: `status` + on/off + error path (restore)
-- [ ] Pass `ruff check` + `ruff format --check`
-- [ ] Create GitHub issue on coport-uni/python-smart-plug
+- [x] Rewrite `main.py`: wrap parser/format/run into `SmartPlugCli`
+- [x] Re-verify behavior unchanged: `status` + on/off + error path (restore)
+      (status OK; on/off plug1 OFF->ON->OFF; unknown target -> clean error,
+      exit 2; lint clean)
+- [x] Pass `ruff check` + `ruff format --check`
+- [x] Create GitHub issue on coport-uni/python-smart-plug (#10)
+
+---
+
+## Add non-CLI programmatic functions (status / turn_on / turn_off) to main.py
+
+### Background
+User request (2026-06-18): `main.py` currently only exposes the CLI. Add
+plain functions to check status and switch plugs on/off *without* going
+through the argparse CLI, so they can be called from a REPL or another script.
+
+### Decisions
+- Add module-level synchronous convenience functions in `main.py` that wrap
+  the async `SmartPlugController` (each runs its own `asyncio.run`):
+  - `status(target="all", *, controller=None) -> list[DeviceReport]`
+  - `turn_on(target, *, controller=None) -> list[SwitchResult]`
+  - `turn_off(target, *, controller=None) -> list[SwitchResult]`
+  - `target` is a device name / IP / "all" (same `resolve_targets` rules).
+  - Build the controller via `from_files()` when one is not supplied; accept
+    an optional `controller` so callers can reuse a built instance.
+- Return the data objects (not print) so they are programmatically usable; the
+  CLI (`SmartPlugCli`) remains the human-facing/printing path. Additive change;
+  the CLI is untouched.
+
+### Work items
+- [x] Add `status` / `turn_on` / `turn_off` (+ private async/sync helpers)
+- [x] Verify programmatically: import main; status(); turn_on/off plug1 +
+      restore; confirm DeviceReport/SwitchResult fields
+- [x] Add runnable `main()` demo + `demo` CLI subcommand (user follow-up:
+      "examples in main function"); `python main.py demo` reads status then
+      toggles plug1 on->off and restores. CLI status/on/off unchanged.
+- [x] Pass `ruff check` + `ruff format --check`
+- [x] Create GitHub issue on coport-uni/python-smart-plug (#11)
+
+---
+
+## Document the built-in decorators used (comments)
+
+### Background
+User request (2026-06-18): add an explanation of the decorators used in the
+code -- the "@" annotations applied above functions/classes. Chosen scope
+(via clarifying question, "2번"): explain the existing built-in decorators;
+do not create a custom decorator.
+
+### Decisions
+- Add a concise "Decorators used in this module" comment block near the top
+  of each file (after imports, before the first definition), describing only
+  the decorators that file actually uses and why:
+  - `main.py`: `@staticmethod`, `@classmethod`.
+  - `smartplugcontroller.py`: `@dataclass`, `@property`, `@staticmethod`,
+    `@classmethod`.
+- Comments only; no code/behavior change. English per CLAUDE.md §2.
+
+### Work items
+- [x] Add decorator comment block to `main.py`
+- [x] Add decorator comment block to `smartplugcontroller.py`
+- [x] Pass `ruff check` + `ruff format --check`; confirm both still import
+- [x] Create GitHub issue on coport-uni/python-smart-plug (#12)
+
+---
+
+## Write a beginner-friendly README.md for the repository
+
+### Background
+User request (2026-06-18): write a `README.md` that fits the current repo and
+lets people unfamiliar with the Tapo P110M or python-kasa follow along --
+explain the communication structure and how the code works in detail, using
+visual structure (diagrams) aggressively. Follow-up: the user added a working
+photo + demo video under `media/`; incorporate them too.
+
+### Decisions
+- Written in English per CLAUDE.md §2 (documentation files, including README,
+  are English-only), even though the request was in Korean.
+- Structure (13 sections + Demo): overview, P110M/python-kasa primer, the
+  local-LAN + KLAP communication model, repo layout, layered code
+  architecture, setup, CLI / Python / HTTP usage, the ~4-6 s emeter-lag
+  gotcha (LP §Q3), an end-to-end request trace, troubleshooting, conventions.
+- Visuals: ASCII box diagrams (three front ends, comms handshake, repo tree,
+  data objects, settle window) + two Mermaid diagrams (layered architecture
+  flowchart, toggle sequence diagram).
+- Media: renamed `media/KakaoTalk_*.jpg` -> `esp32-touchscreen-demo.jpg` and
+  `media/KakaoTalk_*.mp4` -> `demo.mp4` (clean, English names). Added a Demo
+  section with the photo as a clickable thumbnail linking to the video; the
+  photo is the ESP32-S3 touchscreen client driving the FastAPI server.
+
+### Work items
+- [x] Write `README.md` (sections + ASCII + Mermaid diagrams)
+- [x] Embed the `media/` photo (hero/thumbnail) and link the demo video
+- [x] Append this ToDo entry
+- [x] Create GitHub issue on coport-uni/SmartPlugController (#13)
+      (origin `python-smart-plug` was renamed to `SmartPlugController`;
+      the old URL still redirects)

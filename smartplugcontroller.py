@@ -26,6 +26,21 @@ from pathlib import Path
 from kasa import Credentials, Device, Discover, Module
 from kasa.exceptions import KasaException
 
+# Decorators used in this module. A decorator is the ``@name`` line written
+# just above a class, function, or method ("external" annotation): Python
+# applies ``name`` to the object below it and uses whatever ``name`` returns.
+#   @dataclass            -- auto-generates ``__init__``/``__repr__``/``__eq__``
+#       from the annotated fields, so the small data carriers below need no
+#       boilerplate. ``@dataclass(frozen=True)`` also makes instances immutable
+#       (used for ``DeviceEntry``).
+#   @property             -- exposes a no-argument method as a read-only
+#       attribute, so callers read ``report.ok`` / ``controller.entries`` like a
+#       field instead of calling a method.
+#   @staticmethod         -- a method that takes neither ``self`` nor ``cls``; a
+#       plain function grouped under the class (e.g. ``read_energy``).
+#   @classmethod          -- a method that receives the class as ``cls`` instead
+#       of an instance (used by ``from_files`` and ``_read_credentials``).
+
 
 class ControllerError(RuntimeError):
     """A configuration error that prevents the controller from running.
