@@ -338,13 +338,16 @@ state/power. Plan approved in `/root/.claude/plans/fastapi-cached-flame.md`.
   `claude_test/README.md`) when verifying power after a toggle.
 
 ### Work items
-- [ ] Create GitHub issue on coport-uni/python-smart-plug
-- [ ] Cut branch `feature/fastapi-plug-server` from `master`
-- [ ] Install `fastapi` + `uvicorn[standard]` into conda env `smartplug`
-- [ ] Extract shared helpers into `device_common.py`; refactor `main.py`
-- [ ] Implement `plug_server/` (models, manager, app) on port 17046
-- [ ] Add `run_server.sh` launcher
-- [ ] Add `claude_test/debug_api_client.py`; update `claude_test/README.md`
-- [ ] Pass `ruff check` + `ruff format --check` on all new files
-- [ ] Verify end-to-end (health/list/state/on/off/toggle/energy via curl)
-- [ ] Open PR -> coport-uni/python-smart-plug @ master
+- [x] Create GitHub issue on coport-uni/python-smart-plug (#6)
+- [x] Cut branch `feature/fastapi-plug-server` from `master`
+- [x] Install `fastapi` + `uvicorn[standard]` into conda env `smartplug`
+- [x] Extract shared helpers into `device_common.py`; refactor `main.py`
+      (changed: reused the concurrent `SmartPlugController` instead, per
+      user choice; dropped `device_common.py`)
+- [x] Implement `plug_server/` (models, service, app) on port 17046
+- [x] Add `run_server.sh` launcher
+- [x] Add `claude_test/debug_api_client.py`; update `claude_test/README.md`
+- [x] Pass `ruff check` + `ruff format --check` on all new files
+- [x] Verify end-to-end (health/list/state/on/off/toggle/energy via curl;
+      plug1 ON->91.5 W, OFF->0.0 W)
+- [x] Open PR -> coport-uni/python-smart-plug @ master (#9)
